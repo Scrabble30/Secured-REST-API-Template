@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>app</groupId>
-    <artifactId>JPA-Template</artifactId>
+    <artifactId>REST-API-Template</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <properties>
