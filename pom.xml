@@ -20,6 +20,9 @@
 
         <javalin.version>6.3.0</javalin.version>
 
+        <token.security.version>1.0.1</token.security.version>
+        <jbcrypt.version>0.4</jbcrypt.version>
+
         <logback.version>1.5.8</logback.version>
 
         <junit.version>5.11.1</junit.version>
@@ -29,6 +32,13 @@
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+
+    <repositories>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+    </repositories>
 
     <dependencies>
 
@@ -72,6 +82,18 @@
             <groupId>io.javalin</groupId>
             <artifactId>javalin</artifactId>
             <version>${javalin.version}</version>
+        </dependency>
+
+        <!--    Security    -->
+        <dependency>
+            <groupId>com.github.Hartmannsolution</groupId>
+            <artifactId>TokenSecurity</artifactId>
+            <version>${token.security.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mindrot</groupId>
+            <artifactId>jbcrypt</artifactId>
+            <version>${jbcrypt.version}</version>
         </dependency>
 
         <!--    Logging    -->
