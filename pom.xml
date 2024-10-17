@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>app</groupId>
-    <artifactId>REST-API-Template</artifactId>
+    <artifactId>Secured-REST-API-Template</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <properties>
