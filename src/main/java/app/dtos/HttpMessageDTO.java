@@ -15,7 +15,6 @@ public class HttpMessageDTO {
     }
 
     public HttpMessageDTO(HttpStatus status, String message) {
-        this.status = status.getCode();
-        this.message = message;
+        this(status.getCode(), message);
     }
 }
