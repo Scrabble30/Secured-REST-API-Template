@@ -1,6 +1,6 @@
-## REST API Template
+## Secured REST API Template
 
-This is a REST API template that can be used as the basis start code for a REST API project.
+This is a Secured REST API template that can be used as the basis start code for a Secured REST API project.
 
 ### Includes:
 
@@ -8,6 +8,8 @@ This is a REST API template that can be used as the basis start code for a REST 
 - Lombok
 - Hibernate
 - Javalin
+- Token Security
+- JBCrypt
 - Logback
 - JUnit5
 - Hamcrest
