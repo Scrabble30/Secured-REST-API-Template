@@ -46,6 +46,7 @@ public class AppConfig {
 
         Javalin app = Javalin.create(AppConfig::configuration);
         handleExceptions(app);
+        handleAccess(app);
         app.start(port);
 
         return app;
