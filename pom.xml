@@ -20,7 +20,6 @@
 
         <javalin.version>6.3.0</javalin.version>
 
-        <token.security.version>1.0.1</token.security.version>
         <nimbus-jose-jwt.version>9.41.2</nimbus-jose-jwt.version>
         <jbcrypt.version>0.4</jbcrypt.version>
 
@@ -33,13 +32,6 @@
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
-
-    <repositories>
-        <repository>
-            <id>jitpack.io</id>
-            <url>https://jitpack.io</url>
-        </repository>
-    </repositories>
 
     <dependencies>
 
@@ -86,11 +78,6 @@
         </dependency>
 
         <!--    Security    -->
-        <dependency>
-            <groupId>com.github.Hartmannsolution</groupId>
-            <artifactId>TokenSecurity</artifactId>
-            <version>${token.security.version}</version>
-        </dependency>
         <dependency>
             <groupId>com.nimbusds</groupId>
             <artifactId>nimbus-jose-jwt</artifactId>

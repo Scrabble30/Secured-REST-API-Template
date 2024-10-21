@@ -8,7 +8,6 @@ This is a Secured REST API template that can be used as the basis start code for
 - Lombok
 - Hibernate
 - Javalin
-- Token Security
 - JBCrypt
 - Logback
 - JUnit5
