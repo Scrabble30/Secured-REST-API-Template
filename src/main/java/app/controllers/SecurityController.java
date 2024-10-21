@@ -14,6 +14,7 @@ import dk.bugelhartmann.TokenSecurity;
 import dk.bugelhartmann.UserDTO;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
+import io.javalin.validation.ValidationException;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityNotFoundException;
@@ -45,7 +46,7 @@ public class SecurityController {
 
     public void login(Context ctx) {
         try {
-            UserDTO userDTO = ctx.bodyAsClass(UserDTO.class);
+            UserDTO userDTO = ctx.bodyValidator(UserDTO.class).get();
 
             User verifiedUser = securityDAO.getVerifiedUser(userDTO.getUsername(), userDTO.getPassword());
             UserDTO verifiedUserDTO = new UserDTO(
@@ -66,6 +67,8 @@ public class SecurityController {
             ctx.json(responseJson);
         } catch (EntityNotFoundException e) {
             throw new APIException(HttpStatus.NOT_FOUND, e.getMessage());
+        } catch (ValidationException e) {
+            throw new APIException(HttpStatus.BAD_REQUEST, e.getErrors().toString());
         } catch (PasswordValidationException e) {
             throw new APIException(HttpStatus.UNAUTHORIZED, e.getMessage());
         } catch (IOException | TokenCreationException e) {
@@ -75,7 +78,7 @@ public class SecurityController {
 
     public void register(Context ctx) {
         try {
-            UserDTO userDTO = ctx.bodyAsClass(UserDTO.class);
+            UserDTO userDTO = ctx.bodyValidator(UserDTO.class).get();
 
             User createdUser = securityDAO.create(userDTO.getUsername(), userDTO.getPassword());
             UserDTO createdUserDTO = new UserDTO(
@@ -96,6 +99,8 @@ public class SecurityController {
             ctx.json(responseJson);
         } catch (EntityExistsException e) {
             throw new APIException(HttpStatus.CONFLICT, e.getMessage());
+        } catch (ValidationException e) {
+            throw new APIException(HttpStatus.BAD_REQUEST, e.getErrors().toString());
         } catch (IOException | TokenCreationException e) {
             throw new APIException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
         }
@@ -115,6 +120,8 @@ public class SecurityController {
 
         try {
             return verifyToken(token);
+        } catch (APIException e) {
+            throw new APIException(e.getStatusCode(), e.getMessage());
         } catch (IOException e) {
             throw new APIException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
         } catch (Exception e) {
