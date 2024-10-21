@@ -2,6 +2,7 @@ package app.routes;
 
 import app.controllers.SecurityController;
 import app.dtos.HttpMessageDTO;
+import app.enums.AppRouteRole;
 import io.javalin.apibuilder.EndpointGroup;
 import jakarta.persistence.EntityManagerFactory;
 
@@ -18,9 +19,9 @@ public class SecurityRoutes {
     public EndpointGroup getSecurityRoutes() {
         return () -> {
             path("/auth", () -> {
-                get("/test", ctx -> ctx.json(new HttpMessageDTO(200, "Hello from open."), HttpMessageDTO.class));
-                post("/login", securityController::login);
-                post("/register", securityController::register);
+                get("/test", ctx -> ctx.json(new HttpMessageDTO(200, "Hello from open."), HttpMessageDTO.class), AppRouteRole.ANYONE);
+                post("/login", securityController::login, AppRouteRole.ANYONE);
+                post("/register", securityController::register, AppRouteRole.ANYONE);
             });
         };
     }
@@ -28,8 +29,8 @@ public class SecurityRoutes {
     public EndpointGroup getProtectedDemoRoutes() {
         return () -> {
             path("/protected", () -> {
-                get("/user_demo", ctx -> ctx.json(new HttpMessageDTO(200, "Hello from user protected."), HttpMessageDTO.class));
-                get("/admin_demo", ctx -> ctx.json(new HttpMessageDTO(200, "Hello from admin protected."), HttpMessageDTO.class));
+                get("/user_demo", ctx -> ctx.json(new HttpMessageDTO(200, "Hello from user protected."), HttpMessageDTO.class), AppRouteRole.USER);
+                get("/admin_demo", ctx -> ctx.json(new HttpMessageDTO(200, "Hello from admin protected."), HttpMessageDTO.class), AppRouteRole.ADMIN);
             });
         };
     }
