@@ -8,8 +8,8 @@ import app.exceptions.APIException;
 import app.exceptions.PasswordValidationException;
 import app.exceptions.TokenCreationException;
 import app.exceptions.TokenValidationException;
-import app.security.TokenSecurity;
 import app.security.ITokenSecurity;
+import app.security.TokenSecurity;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.javalin.http.Context;
@@ -111,11 +111,14 @@ public class SecurityController {
         if (authorization == null) {
             throw new APIException(HttpStatus.UNAUTHORIZED, "Missing Authorization header");
         }
-        if (!authorization.contains("Bearer")) {
+
+        String[] authorizationParts = authorization.split(" ");
+
+        if (authorizationParts.length != 2 || !authorizationParts[0].equalsIgnoreCase("Bearer")) {
             throw new APIException(HttpStatus.UNAUTHORIZED, "Invalid Authorization header");
         }
 
-        String token = authorization.substring("Bearer ".length());
+        String token = authorizationParts[1];
 
         try {
             return validateToken(token);
@@ -126,7 +129,7 @@ public class SecurityController {
         }
     }
 
-    private String createToken(UserDTO userDTO) throws IOException, TokenCreationException {
+    public String createToken(UserDTO userDTO) throws IOException, TokenCreationException {
         String ISSUER;
         String TOKEN_EXPIRE_TIME;
         String SECRET_KEY;
@@ -136,7 +139,7 @@ public class SecurityController {
             TOKEN_EXPIRE_TIME = System.getenv("TOKEN_EXPIRE_TIME");
             SECRET_KEY = System.getenv("SECRET_KEY");
         } else {
-            Properties properties = getProperties("config.properties");
+            Properties properties = getConfigProperties();
 
             ISSUER = properties.getProperty("ISSUER");
             TOKEN_EXPIRE_TIME = properties.getProperty("TOKEN_EXPIRE_TIME");
@@ -148,15 +151,15 @@ public class SecurityController {
 
     public UserDTO validateToken(String token) throws IOException, TokenValidationException {
         boolean IS_DEPLOYED = (System.getenv("DEPLOYED") != null);
-        String SECRET_KEY = IS_DEPLOYED ? System.getenv("SECRET_KEY") : getProperties("config.properties").getProperty("SECRET_KEY");
+        String SECRET_KEY = IS_DEPLOYED ? System.getenv("SECRET_KEY") : getConfigProperties().getProperty("SECRET_KEY");
 
         return tokenSecurity.validateToken(token, SECRET_KEY);
     }
 
-    private Properties getProperties(String resourceName) throws IOException {
-        try (InputStream inputStream = SecurityController.class.getClassLoader().getResourceAsStream(resourceName)) {
+    private Properties getConfigProperties() throws IOException {
+        try (InputStream inputStream = SecurityController.class.getClassLoader().getResourceAsStream("config.properties")) {
             if (inputStream == null) {
-                throw new IOException(String.format("Property file '%s' not found in the classpath", resourceName));
+                throw new IOException("Property file 'config.properties' not found in the classpath");
             }
 
             Properties properties = new Properties();
