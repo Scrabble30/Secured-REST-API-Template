@@ -60,7 +60,7 @@ public class TokenSecurity implements ITokenSecurity {
         }
     }
 
-    public boolean isTokenVerified(SignedJWT jwt, String SECRET_KEY) throws TokenValidationException {
+    private boolean isTokenVerified(SignedJWT jwt, String SECRET_KEY) throws TokenValidationException {
         try {
             MACVerifier verifier = new MACVerifier(SECRET_KEY);
 
@@ -70,7 +70,7 @@ public class TokenSecurity implements ITokenSecurity {
         }
     }
 
-    public boolean hasTokenExpired(SignedJWT jwt) throws TokenValidationException {
+    private boolean hasTokenExpired(SignedJWT jwt) throws TokenValidationException {
         try {
             return jwt.getJWTClaimsSet().getExpirationTime().before(new Date());
         } catch (ParseException e) {
