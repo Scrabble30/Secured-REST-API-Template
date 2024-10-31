@@ -12,7 +12,7 @@ import jakarta.persistence.EntityManagerFactory;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class AccessController {
+public class AccessController implements IAccessController {
 
     private final SecurityController securityController;
 
@@ -20,6 +20,7 @@ public class AccessController {
         this.securityController = SecurityController.getInstance(emf);
     }
 
+    @Override
     public void handleAccess(Context ctx) {
         if (ctx.routeRoles().isEmpty() || ctx.routeRoles().contains(AppRouteRole.ANYONE) || ctx.method().equals(HandlerType.OPTIONS)) {
             return;

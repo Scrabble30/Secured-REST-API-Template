@@ -24,7 +24,7 @@ import java.io.InputStream;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
-public class SecurityController {
+public class SecurityController implements ISecurityController {
 
     private static SecurityController instance;
     private final ITokenSecurity tokenSecurity;
@@ -43,6 +43,7 @@ public class SecurityController {
         return instance;
     }
 
+    @Override
     public void login(Context ctx) {
         try {
             UserDTO userDTO = ctx.bodyValidator(UserDTO.class).get();
@@ -70,11 +71,10 @@ public class SecurityController {
             throw new APIException(HttpStatus.NOT_FOUND, e.getMessage());
         } catch (PasswordValidationException e) {
             throw new APIException(HttpStatus.UNAUTHORIZED, e.getMessage());
-        } catch (IOException | TokenCreationException e) {
-            throw new APIException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
 
+    @Override
     public void register(Context ctx) {
         try {
             UserDTO userDTO = ctx.bodyValidator(UserDTO.class).get();
@@ -100,11 +100,10 @@ public class SecurityController {
             throw new APIException(HttpStatus.BAD_REQUEST, e.getErrors().toString());
         } catch (EntityExistsException e) {
             throw new APIException(HttpStatus.CONFLICT, e.getMessage());
-        } catch (IOException | TokenCreationException e) {
-            throw new APIException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
 
+    @Override
     public UserDTO authenticate(Context ctx) {
         String authorization = ctx.header("Authorization");
 
@@ -120,40 +119,46 @@ public class SecurityController {
 
         String token = authorizationParts[1];
 
+        return validateToken(token);
+    }
+
+    @Override
+    public String createToken(UserDTO userDTO) {
         try {
-            return validateToken(token);
+            String ISSUER;
+            String TOKEN_EXPIRE_TIME;
+            String SECRET_KEY;
+
+            if (System.getenv("DEPLOYED") != null) {
+                ISSUER = System.getenv("ISSUER");
+                TOKEN_EXPIRE_TIME = System.getenv("TOKEN_EXPIRE_TIME");
+                SECRET_KEY = System.getenv("SECRET_KEY");
+            } else {
+                Properties properties = getConfigProperties();
+
+                ISSUER = properties.getProperty("ISSUER");
+                TOKEN_EXPIRE_TIME = properties.getProperty("TOKEN_EXPIRE_TIME");
+                SECRET_KEY = properties.getProperty("SECRET_KEY");
+            }
+
+            return tokenSecurity.createToken(userDTO, ISSUER, Long.parseLong(TOKEN_EXPIRE_TIME), SECRET_KEY);
+        } catch (IOException | TokenCreationException e) {
+            throw new APIException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e.getCause());
+        }
+    }
+
+    @Override
+    public UserDTO validateToken(String token) {
+        try {
+            boolean IS_DEPLOYED = (System.getenv("DEPLOYED") != null);
+            String SECRET_KEY = IS_DEPLOYED ? System.getenv("SECRET_KEY") : getConfigProperties().getProperty("SECRET_KEY");
+
+            return tokenSecurity.validateToken(token, SECRET_KEY);
         } catch (TokenValidationException e) {
-            throw new APIException(HttpStatus.UNAUTHORIZED, e.getMessage());
+            throw new APIException(HttpStatus.UNAUTHORIZED, e.getMessage(), e.getCause());
         } catch (IOException e) {
-            throw new APIException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+            throw new APIException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e.getCause());
         }
-    }
-
-    public String createToken(UserDTO userDTO) throws IOException, TokenCreationException {
-        String ISSUER;
-        String TOKEN_EXPIRE_TIME;
-        String SECRET_KEY;
-
-        if (System.getenv("DEPLOYED") != null) {
-            ISSUER = System.getenv("ISSUER");
-            TOKEN_EXPIRE_TIME = System.getenv("TOKEN_EXPIRE_TIME");
-            SECRET_KEY = System.getenv("SECRET_KEY");
-        } else {
-            Properties properties = getConfigProperties();
-
-            ISSUER = properties.getProperty("ISSUER");
-            TOKEN_EXPIRE_TIME = properties.getProperty("TOKEN_EXPIRE_TIME");
-            SECRET_KEY = properties.getProperty("SECRET_KEY");
-        }
-
-        return tokenSecurity.createToken(userDTO, ISSUER, Long.parseLong(TOKEN_EXPIRE_TIME), SECRET_KEY);
-    }
-
-    public UserDTO validateToken(String token) throws IOException, TokenValidationException {
-        boolean IS_DEPLOYED = (System.getenv("DEPLOYED") != null);
-        String SECRET_KEY = IS_DEPLOYED ? System.getenv("SECRET_KEY") : getConfigProperties().getProperty("SECRET_KEY");
-
-        return tokenSecurity.validateToken(token, SECRET_KEY);
     }
 
     private Properties getConfigProperties() throws IOException {
