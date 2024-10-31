@@ -21,11 +21,7 @@ public class AccessController {
     }
 
     public void handleAccess(Context ctx) {
-        if (ctx.routeRoles().isEmpty() || ctx.routeRoles().contains(AppRouteRole.ANYONE)) {
-            return;
-        }
-
-        if (ctx.method().equals(HandlerType.OPTIONS)) {
+        if (ctx.routeRoles().isEmpty() || ctx.routeRoles().contains(AppRouteRole.ANYONE) || ctx.method().equals(HandlerType.OPTIONS)) {
             return;
         }
 
@@ -33,7 +29,9 @@ public class AccessController {
         Set<String> userRoles = userDTO.getRoles().stream().map(String::toUpperCase).collect(Collectors.toSet());
         Set<String> allowedRoles = ctx.routeRoles().stream().map(RouteRole::toString).collect(Collectors.toSet());
 
-        if (allowedRoles.stream().noneMatch(userRoles::contains)) {
+        if (allowedRoles.stream().anyMatch(userRoles::contains)) {
+            ctx.attribute("user", userDTO);
+        } else {
             throw new APIException(HttpStatus.FORBIDDEN, String.format("Unauthorized with user roles: %s. Needed Roles: %s", userRoles, allowedRoles));
         }
     }
