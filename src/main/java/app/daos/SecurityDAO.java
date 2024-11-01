@@ -10,7 +10,7 @@ import jakarta.persistence.EntityNotFoundException;
 
 import java.util.Set;
 
-public class SecurityDAO {
+public class SecurityDAO implements ISecurityDAO {
 
     private static SecurityDAO instance;
     private final EntityManagerFactory emf;
@@ -27,7 +27,8 @@ public class SecurityDAO {
         return instance;
     }
 
-    public User create(String username, String password) {
+    @Override
+    public User createUser(String username, String password) {
         try (EntityManager em = emf.createEntityManager()) {
             User foundUser = em.find(User.class, username);
 
@@ -55,6 +56,7 @@ public class SecurityDAO {
         }
     }
 
+    @Override
     public User getVerifiedUser(String username, String password) {
         try (EntityManager em = emf.createEntityManager()) {
             User foundUser = em.find(User.class, username);

@@ -1,5 +1,6 @@
 package app.controllers;
 
+import app.daos.ISecurityDAO;
 import app.daos.SecurityDAO;
 import app.dtos.UserDTO;
 import app.entities.Role;
@@ -28,7 +29,7 @@ public class SecurityController implements ISecurityController {
 
     private static SecurityController instance;
     private final ITokenSecurity tokenSecurity;
-    private final SecurityDAO securityDAO;
+    private final ISecurityDAO securityDAO;
 
     private SecurityController(EntityManagerFactory emf) {
         this.tokenSecurity = new TokenSecurity();
@@ -79,7 +80,7 @@ public class SecurityController implements ISecurityController {
         try {
             UserDTO userDTO = ctx.bodyValidator(UserDTO.class).get();
 
-            User createdUser = securityDAO.create(userDTO.getUsername(), userDTO.getPassword());
+            User createdUser = securityDAO.createUser(userDTO.getUsername(), userDTO.getPassword());
             UserDTO createdUserDTO = new UserDTO(
                     createdUser.getUsername(),
                     createdUser.getRoles().stream()
